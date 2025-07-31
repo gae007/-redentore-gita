@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -14,7 +15,10 @@
 </head>
 <body>
   <h1>Lista Partecipanti</h1>
-  <table id="partecipantiTable">
+
+  <div id="loading" style="color: #ccc;">⏳ Caricamento dati in corso...</div>
+
+  <table id="partecipantiTable" style="display:none;">
     <thead>
       <tr>
         <th>Nome</th>
@@ -46,9 +50,12 @@
     let editingIndex = -1;
 
     async function caricaPartecipanti() {
+      document.getElementById("loading").style.display = "block";
       const res = await fetch(apiURL);
       partecipanti = await res.json();
       aggiornaTabella();
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("partecipantiTable").style.display = "table";
     }
 
     function aggiornaTabella() {
@@ -104,8 +111,7 @@
       }
 
       await fetch(apiURL, { method: "POST", body: params });
-      annulla();
-      caricaPartecipanti();
+      location.reload();
     }
 
     function annulla() {
@@ -143,76 +149,10 @@
       params.append("password", password);
 
       await fetch(apiURL, { method: "POST", body: params });
-      caricaPartecipanti();
+      location.reload();
     }
-	
-	// Aggiorna queste due funzioni nel tuo script
-async function caricaPartecipanti() {
-  document.getElementById("loading").style.display = "block";
-  const res = await fetch(apiURL);
-  partecipanti = await res.json();
-  aggiornaTabella();
-  document.getElementById("loading").style.display = "none";
-}
-
-	async function salvaPartecipante() {
-	  const nome = document.getElementById("nome").value.trim();
-	  const cognome = document.getElementById("cognome").value.trim();
-	  const caparra = document.getElementById("caparra").checked;
-	  const saldo = document.getElementById("saldo").checked;
-	  const password = document.getElementById("password").value;
-
-	  if (password !== "SuperGitaRedentore") {
-		alert("Password errata.");
-		return;
-	  }
-
-	  const params = new URLSearchParams();
-	  params.append("password", password);
-
-	  if (editingIndex === -1) {
-		params.append("action", "add");
-		params.append("nome", nome);
-		params.append("cognome", cognome);
-		params.append("caparra", caparra);
-		params.append("saldo", saldo);
-	  } else {
-		const old = partecipanti[editingIndex];
-		params.append("action", "edit");
-		params.append("oldNome", old.nome);
-		params.append("oldCognome", old.cognome);
-		params.append("nome", nome);
-		params.append("cognome", cognome);
-		params.append("caparra", caparra);
-		params.append("saldo", saldo);
-	  }
-
-	  await fetch(apiURL, { method: "POST", body: params });
-	  location.reload(); // più efficace che aspettare una risposta completa
-	}
-
-	async function rimuovi(index) {
-	  const p = partecipanti[index];
-	  const password = prompt("Inserisci la password per confermare la rimozione:");
-	  if (password !== "SuperGitaRedentore") {
-		alert("Password errata.");
-		return;
-	  }
-
-	  const params = new URLSearchParams();
-	  params.append("action", "remove");
-	  params.append("nome", p.nome);
-	  params.append("cognome", p.cognome);
-	  params.append("password", password);
-
-	  await fetch(apiURL, { method: "POST", body: params });
-	  location.reload(); // anche qui ricarichiamo la pagina
-	}
-
 
     caricaPartecipanti();
-	
-
   </script>
 </body>
 </html>
