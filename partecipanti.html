@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Partecipanti - Gita Redentore</title>
+  <style>
+    body { font-family: sans-serif; background: #222; color: #fff; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { padding: 10px; border-bottom: 1px solid #444; }
+    button { padding: 5px 10px; margin: 0 2px; }
+    .form-box { background: #333; padding: 20px; border-radius: 10px; margin-top: 20px; }
+    input, label { display: block; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Lista Partecipanti</h1>
+  <table id="partecipantiTable">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Cognome</th>
+        <th>Caparra</th>
+        <th>Saldo</th>
+        <th>Azioni</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <button onclick="showForm()">Aggiungi partecipante</button>
+
+  <div id="formBox" class="form-box" style="display:none;">
+    <h3 id="formTitle">Nuovo Partecipante</h3>
+    <label>Nome: <input type="text" id="nome"></label>
+    <label>Cognome: <input type="text" id="cognome"></label>
+    <label><input type="checkbox" id="caparra"> Caparra pagata</label>
+    <label><input type="checkbox" id="saldo"> Saldo completato</label>
+    <label>Password: <input type="password" id="password"></label>
+    <button onclick="salvaPartecipante()">Salva</button>
+    <button onclick="annulla()">Annulla</button>
+  </div>
+
+  <script>
+    let partecipanti = [];
+    let editingIndex = -1;
+
+    function aggiornaTabella() {
+      const tbody = document.querySelector("tbody");
+      tbody.innerHTML = partecipanti.map((p, i) => `
+        <tr>
+          <td>${p.nome}</td>
+          <td>${p.cognome}</td>
+          <td>${p.caparra ? '✅' : '❌'}</td>
+          <td>${p.saldo ? '✅' : '❌'}</td>
+          <td>
+            <button onclick="modifica(${i})">Modifica</button>
+            <button onclick="rimuovi(${i})">Rimuovi</button>
+          </td>
+        </tr>`).join("");
+    }
+
+    function showForm(edit = false) {
+      document.getElementById("formBox").style.display = "block";
+      document.getElementById("formTitle").innerText = edit ? "Modifica Partecipante" : "Nuovo Partecipante";
+    }
+
+    function salvaPartecipante() {
+      const nome = document.getElementById("nome").value.trim();
+      const cognome = document.getElementById("cognome").value.trim();
+      const caparra = document.getElementById("caparra").checked;
+      const saldo = document.getElementById("saldo").checked;
+      const password = document.getElementById("password").value;
+
+      if (password !== "SuperGitaRedentore") {
+        alert("Password errata.");
+        return;
+      }
+
+      const partecipante = { nome, cognome, caparra, saldo };
+
+      if (editingIndex === -1) {
+        partecipanti.push(partecipante);
+      } else {
+        partecipanti[editingIndex] = partecipante;
+      }
+
+      annulla();
+      aggiornaTabella();
+    }
+
+    function annulla() {
+      editingIndex = -1;
+      document.getElementById("nome").value = "";
+      document.getElementById("cognome").value = "";
+      document.getElementById("caparra").checked = false;
+      document.getElementById("saldo").checked = false;
+      document.getElementById("password").value = "";
+      document.getElementById("formBox").style.display = "none";
+    }
+
+    function modifica(index) {
+      const p = partecipanti[index];
+      editingIndex = index;
+      document.getElementById("nome").value = p.nome;
+      document.getElementById("cognome").value = p.cognome;
+      document.getElementById("caparra").checked = p.caparra;
+      document.getElementById("saldo").checked = p.saldo;
+      showForm(true);
+    }
+
+    function rimuovi(index) {
+      const password = prompt("Inserisci la password per confermare la rimozione:");
+      if (password !== "SuperGitaRedentore") {
+        alert("Password errata.");
+        return;
+      }
+      partecipanti.splice(index, 1);
+      aggiornaTabella();
+    }
+
+    aggiornaTabella();
+  </script>
+</body>
+</html>
