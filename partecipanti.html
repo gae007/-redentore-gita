@@ -41,4 +41,112 @@
   </div>
 
   <script>
-    const apiURL = "https://script.google.com/macros/s/AKfycbzH5RAvZGvRlbY9Xpu6FT60Ew5HHg5uh8fk7JSOduE6r1L3mb5kH0w-CFBb8qU2g-D
+    const apiURL = "https://script.google.com/macros/s/AKfycbzH5RAvZGvRlbY9Xpu6FT60Ew5HHg5uh8fk7JSOduE6r1L3mb5kH0w-CFBb8qU2g-DfaA/exec";
+    let partecipanti = [];
+    let editingIndex = -1;
+
+    async function caricaPartecipanti() {
+      const res = await fetch(apiURL);
+      partecipanti = await res.json();
+      aggiornaTabella();
+    }
+
+    function aggiornaTabella() {
+      const tbody = document.querySelector("tbody");
+      tbody.innerHTML = partecipanti.map((p, i) => `
+        <tr>
+          <td>${p.nome}</td>
+          <td>${p.cognome}</td>
+          <td>${p.caparra === true || p.caparra === "true" ? '✅' : '❌'}</td>
+          <td>${p.saldo === true || p.saldo === "true" ? '✅' : '❌'}</td>
+          <td>
+            <button onclick="modifica(${i})">Modifica</button>
+            <button onclick="rimuovi(${i})">Rimuovi</button>
+          </td>
+        </tr>`).join("");
+    }
+
+    function showForm(edit = false) {
+      document.getElementById("formBox").style.display = "block";
+      document.getElementById("formTitle").innerText = edit ? "Modifica Partecipante" : "Nuovo Partecipante";
+    }
+
+    async function salvaPartecipante() {
+      const nome = document.getElementById("nome").value.trim();
+      const cognome = document.getElementById("cognome").value.trim();
+      const caparra = document.getElementById("caparra").checked;
+      const saldo = document.getElementById("saldo").checked;
+      const password = document.getElementById("password").value;
+
+      if (password !== "SuperGitaRedentore") {
+        alert("Password errata.");
+        return;
+      }
+
+      const params = new URLSearchParams();
+      params.append("password", password);
+
+      if (editingIndex === -1) {
+        params.append("action", "add");
+        params.append("nome", nome);
+        params.append("cognome", cognome);
+        params.append("caparra", caparra);
+        params.append("saldo", saldo);
+      } else {
+        const old = partecipanti[editingIndex];
+        params.append("action", "edit");
+        params.append("oldNome", old.nome);
+        params.append("oldCognome", old.cognome);
+        params.append("nome", nome);
+        params.append("cognome", cognome);
+        params.append("caparra", caparra);
+        params.append("saldo", saldo);
+      }
+
+      await fetch(apiURL, { method: "POST", body: params });
+      annulla();
+      caricaPartecipanti();
+    }
+
+    function annulla() {
+      editingIndex = -1;
+      document.getElementById("formBox").style.display = "none";
+      document.getElementById("nome").value = "";
+      document.getElementById("cognome").value = "";
+      document.getElementById("caparra").checked = false;
+      document.getElementById("saldo").checked = false;
+      document.getElementById("password").value = "";
+    }
+
+    function modifica(index) {
+      const p = partecipanti[index];
+      editingIndex = index;
+      document.getElementById("nome").value = p.nome;
+      document.getElementById("cognome").value = p.cognome;
+      document.getElementById("caparra").checked = p.caparra === "true" || p.caparra === true;
+      document.getElementById("saldo").checked = p.saldo === "true" || p.saldo === true;
+      showForm(true);
+    }
+
+    async function rimuovi(index) {
+      const p = partecipanti[index];
+      const password = prompt("Inserisci la password per confermare la rimozione:");
+      if (password !== "SuperGitaRedentore") {
+        alert("Password errata.");
+        return;
+      }
+
+      const params = new URLSearchParams();
+      params.append("action", "remove");
+      params.append("nome", p.nome);
+      params.append("cognome", p.cognome);
+      params.append("password", password);
+
+      await fetch(apiURL, { method: "POST", body: params });
+      caricaPartecipanti();
+    }
+
+    caricaPartecipanti();
+  </script>
+</body>
+</html>
