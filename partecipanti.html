@@ -21,16 +21,16 @@
   <table id="partecipantiTable" style="display:none;">
     <thead>
       <tr>
-        <th style="text-align: left;">Nome</th>
-        <th style="text-align: left;">Cognome</th>
-        <th style="text-align: left;">Caparra</th>
-        <th style="text-align: left;">Saldo</th>
-        <th style="text-align: left;">Azioni</th>
+        <th>Nome</th>
+        <th>Cognome</th>
+        <th>Caparra</th>
+        <th>Saldo</th>
+        <th>Azioni</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
-<h1> </h1>
+
   <button onclick="showForm()">Aggiungi partecipante</button>
 
   <div id="formBox" class="form-box" style="display:none;">
@@ -43,6 +43,9 @@
     <button onclick="salvaPartecipante()">Salva</button>
     <button onclick="annulla()">Annulla</button>
   </div>
+  
+    <p>Per maggiori dettagli <a href="index.html" style="color: #0cf;">pagina dettagli gita</a>.</p>
+
 
   <script>
     const apiURL = "https://script.google.com/macros/s/AKfycbzH5RAvZGvRlbY9Xpu6FT60Ew5HHg5uh8fk7JSOduE6r1L3mb5kH0w-CFBb8qU2g-DfaA/exec";
